@@ -64,17 +64,17 @@ def load_suggestions():
 
 
 def save_suggestions():
-
-    with open(SUGGESTIONS_FILE, "w", newline="") as f:
-
-        fields = ["employee", "suggestion", "date"]
-
-        writer = csv.DictWriter(f, fieldnames=fields)
-
-        writer.writeheader()
-
-        for s in suggestions:
-            writer.writerow(s)
+    try:
+        with open(SUGGESTIONS_FILE, "w", newline="") as f:
+            fields = ["employee", "suggestion", "date", "status"]
+            writer = csv.DictWriter(f, fieldnames=fields)
+            writer.writeheader()
+            for s in suggestions:
+                writer.writerow(s)
+        return True
+    except Exception as e:
+        print(f"Error saving suggestions: {e}")
+        return False
 
 
 def load_enquiries():
@@ -92,17 +92,18 @@ def load_enquiries():
 
 
 def save_enquiries():
-
-    with open(ENQUIRIES_FILE, "w", newline="") as f:
-
-        fields = ["employee", "enquiry", "date"]
-
-        writer = csv.DictWriter(f, fieldnames=fields)
-
-        writer.writeheader()
-
-        for e in enquiries:
-            writer.writerow(e)
+    try:
+        with open(ENQUIRIES_FILE, "w", newline="") as f:
+            fields = ["employee", "subject", "enquiry",
+                      "priority", "date", "status", "response"]
+            writer = csv.DictWriter(f, fieldnames=fields)
+            writer.writeheader()
+            for e in enquiries:
+                writer.writerow(e)
+        return True
+    except Exception as e:
+        print(f"Error saving enquiries: {e}")
+        return False
 
 # ---------------- BOSS CSV ----------------
 
@@ -845,37 +846,12 @@ def employee_edit_profile(name):
         e.insert(0, d[field])
         entries[field] = e
 
-    # Password change section (optional)
-    tk.Label(content, text="Change Password (Optional)",
-             font=("Arial", 16, "bold"), bg=bg).pack(pady=20)
-
-    pass_frame = tk.Frame(content, bg=bg)
-    pass_frame.pack()
-
-    tk.Label(pass_frame, text="New Password:", font=("Arial", 14),
-             bg=bg).grid(row=0, column=0, padx=10, pady=5, sticky="e")
-    new_pass = tk.Entry(pass_frame, font=("Arial", 14), width=30, show="*")
-    new_pass.grid(row=0, column=1, pady=5)
-
-    tk.Label(pass_frame, text="Confirm Password:", font=("Arial", 14),
-             bg=bg).grid(row=1, column=0, padx=10, pady=5, sticky="e")
-    confirm_pass = tk.Entry(pass_frame, font=("Arial", 14), width=30, show="*")
-    confirm_pass.grid(row=1, column=1, pady=5)
-
     def save_changes():
         # Update regular fields
         for field in ["designation", "age", "address", "salary", "email"]:
             new_value = entries[field].get().strip()
             if new_value:
                 employees[name][field] = new_value
-
-        # Update password if provided
-        if new_pass.get():
-            if new_pass.get() == confirm_pass.get():
-                employees[name]["password"] = new_pass.get()
-            else:
-                messagebox.showerror("Error", "Passwords do not match!")
-                return
 
         save_employees()
         messagebox.showinfo("Success", "Profile updated successfully!")
@@ -964,8 +940,9 @@ def employee_reset_password(name):
     tk.Button(button_frame, text="❌ Cancel", bg="gray", fg="white",
               command=lambda: employee_dashboard(name), font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
 
-
 # ---------------- FEATURE 4: EMPLOYEE GIVE SUGGESTION ----------------
+
+
 def employee_suggestions(name):
     clear(content)
 
@@ -1009,14 +986,18 @@ def employee_suggestions(name):
 
         from datetime import datetime
 
-        # Add to suggestions list
-        suggestions.append({
+        # Create suggestion dictionary
+        new_suggestion = {
             "employee": name,
             "suggestion": suggestion,
             "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "status": "Pending"
-        })
+        }
 
+        # Add to suggestions list
+        suggestions.append(new_suggestion)
+
+        # Save to CSV
         save_suggestions()
 
         messagebox.showinfo(
@@ -1033,8 +1014,9 @@ def employee_suggestions(name):
     tk.Button(button_frame, text="❌ Cancel", bg="gray", fg="white",
               command=lambda: employee_dashboard(name), font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
 
-
 # ---------------- FEATURE 5: EMPLOYEE MAKE ENQUIRY ----------------
+
+
 def employee_enquiries(name):
     clear(content)
 
