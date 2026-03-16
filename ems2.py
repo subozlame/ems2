@@ -707,12 +707,8 @@ def reset_password():
                   0, tk.END), confirm.delete(0, tk.END)],
               font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
 
-    tk.Button(button_frame, text="Back", bg="gray", fg="white",
-              command=lambda: login("employee"), font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
+
 # ---------------- EMPLOYEE PAGE ----------------
-
-# ============== ENHANCED EMPLOYEE PORTAL FEATURES ==============
-
 
 def employee_dashboard(name):
     global employee_name
@@ -1548,10 +1544,14 @@ def dashboard(role):
 
     if role == "boss":
 
-        btns = [("Add Employee", add_employee),
+        btns = [("Add Manager", boss_add_manager),
+                ("View Manager", boss_view_managers),
+                ("Add Employee", add_employee),
                 ("View Employees", view_employees),
                 ("Edit Employee", edit_employee),
+                ("Search Employee", boss_search_employees),
                 ("Delete Employee", delete_employee),
+                ("Delete Manager", boss_delete_manager),
                 ("Reset Password", reset_password),
                 ("Profile", boss_profile)]
 
@@ -1673,9 +1673,6 @@ def boss_profile():
     # Edit Profile Button
     tk.Button(content, text="Edit Profile", bg="blue", fg="white",
               command=boss_edit_profile).pack(pady=20)
-
-    tk.Button(content, text="Logout", bg="red", fg="white",
-              command=logout).pack(pady=10)
 
 
 def view_manager():
@@ -2111,6 +2108,482 @@ def show_enquiry_details(index):
               command=update_enquiry, font=("Arial", 12), width=15).pack(side=tk.LEFT, padx=5)
     tk.Button(button_frame, text="Close", bg="gray", fg="white",
               command=popup.destroy, font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
+
+    # ---------------- BOSS VIEW MANAGERS ----------------
+
+
+def boss_view_managers():
+    clear(content)
+
+    tk.Label(content, text="Manager List",
+             font=("Arial", 28, "bold"), bg=bg).pack(pady=20)
+
+    # Search frame
+    search_frame = tk.Frame(content, bg=bg)
+    search_frame.pack(pady=10)
+
+    tk.Label(search_frame, text="Search by:", font=(
+        "Arial", 14), bg=bg).pack(side=tk.LEFT, padx=5)
+
+    search_by = ttk.Combobox(search_frame, values=["Name", "ID", "Email", "Username"],
+                             font=("Arial", 14), width=10)
+    search_by.set("Name")
+    search_by.pack(side=tk.LEFT, padx=5)
+
+    # Search input and button frame
+    search_input_frame = tk.Frame(content, bg=bg)
+    search_input_frame.pack(pady=5)
+
+    search_entry = tk.Entry(search_input_frame, font=("Arial", 14), width=40)
+    search_entry.pack(side=tk.LEFT, padx=5)
+
+    tk.Button(search_input_frame, text="Search", bg=btn, fg="white",
+              command=lambda: search_managers(), font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
+
+    # Results frame
+    result_frame = tk.Frame(content, bg=bg)
+    result_frame.pack(pady=10, fill="both", expand=True)
+
+    def search_managers():
+        clear(result_frame)
+
+        search_term = search_entry.get().strip().lower()
+        search_type = search_by.get()
+
+        if not managers:
+            tk.Label(result_frame, text="No managers in the system",
+                     font=("Arial", 14), bg=bg, fg="gray").pack(pady=20)
+            return
+
+        found = []
+
+        for username, data in managers.items():
+            if search_type == "Name" and search_term in data.get("name", "").lower():
+                found.append((username, data))
+            elif search_type == "ID" and search_term in data.get("id", "").lower():
+                found.append((username, data))
+            elif search_type == "Email" and search_term in data.get("email", "").lower():
+                found.append((username, data))
+            elif search_type == "Username" and search_term in username.lower():
+                found.append((username, data))
+            elif not search_term:  # If search is empty, show all
+                found.append((username, data))
+
+        if not found and search_term:
+            tk.Label(result_frame, text="No managers found matching your search",
+                     font=("Arial", 14), bg=bg, fg="red").pack(pady=20)
+            return
+
+        # Create table for results
+        table_frame = tk.Frame(result_frame, bg=bg)
+        table_frame.pack(fill="both", expand=True)
+
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(table_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Treeview
+        table = ttk.Treeview(
+            table_frame, yscrollcommand=scrollbar.set, height=15)
+        scrollbar.config(command=table.yview)
+
+        table["columns"] = ("id", "name", "email", "position", "phone")
+        table.heading("#0", text="Username")
+        table.heading("id", text="Manager ID")
+        table.heading("name", text="Name")
+        table.heading("email", text="Email")
+        table.heading("position", text="Position")
+        table.heading("phone", text="Phone")
+
+        table.column("#0", width=120)
+        table.column("id", width=100)
+        table.column("name", width=150)
+        table.column("email", width=180)
+        table.column("position", width=150)
+        table.column("phone", width=120)
+
+        for username, data in found:
+            table.insert("", tk.END, text=username,
+                         values=(data.get("id", ""), data.get("name", ""),
+                                 data.get("email", ""), data.get(
+                             "position", ""),
+                             data.get("phone", "")))
+
+        table.pack(fill="both", expand=True)
+
+    # Initial load
+    search_managers()
+
+    # Buttons
+    button_frame = tk.Frame(content, bg=bg)
+    button_frame.pack(pady=20)
+
+    tk.Button(button_frame, text="➕ Add Manager", bg="green", fg="white",
+              command=boss_add_manager, font=("Arial", 12), width=15).pack(side=tk.LEFT, padx=5)
+    tk.Button(button_frame, text="🗑️ Delete Manager", bg="red", fg="white",
+              command=boss_delete_manager, font=("Arial", 12), width=15).pack(side=tk.LEFT, padx=5)
+    tk.Button(button_frame, text="⬅️ Back", bg="gray", fg="white",
+              command=boss_profile, font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
+
+
+# ---------------- BOSS ADD MANAGER ----------------
+def boss_add_manager():
+    clear(content)
+
+    tk.Label(content, text="Add New Manager",
+             font=("Arial", 28, "bold"), bg=bg).pack(pady=20)
+
+    # Create form frame
+    form_frame = tk.Frame(content, bg=bg)
+    form_frame.pack(pady=20)
+
+    # Form fields
+    fields = [
+        ("Username:*", "username"),
+        ("Password:*", "password"),
+        ("Name:*", "name"),
+        ("Age:*", "age"),
+        ("Address:*", "address"),
+        ("Phone:*", "phone"),
+        ("Email:*", "email"),
+        ("Position:*", "position"),
+        ("Manager ID:*", "id")
+    ]
+
+    entries = {}
+
+    for i, (label, field) in enumerate(fields):
+        tk.Label(form_frame, text=label, font=("Arial", 14),
+                 bg=bg).grid(row=i, column=0, padx=10, pady=8, sticky="e")
+
+        if field == "password":
+            e = tk.Entry(form_frame, font=("Arial", 14), width=30, show="*")
+        else:
+            e = tk.Entry(form_frame, font=("Arial", 14), width=30)
+
+        e.grid(row=i, column=1, pady=8, sticky="w")
+        entries[field] = e
+
+    # Helper text
+    tk.Label(content, text="* Required fields", font=("Arial", 10, "italic"),
+             bg=bg, fg="gray").pack()
+
+    def save_manager():
+        # Get all values
+        username = entries["username"].get().strip()
+        password = entries["password"].get().strip()
+        name = entries["name"].get().strip()
+        age = entries["age"].get().strip()
+        address = entries["address"].get().strip()
+        phone = entries["phone"].get().strip()
+        email = entries["email"].get().strip()
+        position = entries["position"].get().strip()
+        manager_id = entries["id"].get().strip()
+
+        # Validate required fields
+        empty_fields = []
+        if not username:
+            empty_fields.append("Username")
+        if not password:
+            empty_fields.append("Password")
+        if not name:
+            empty_fields.append("Name")
+        if not age:
+            empty_fields.append("Age")
+        if not address:
+            empty_fields.append("Address")
+        if not phone:
+            empty_fields.append("Phone")
+        if not email:
+            empty_fields.append("Email")
+        if not position:
+            empty_fields.append("Position")
+        if not manager_id:
+            empty_fields.append("Manager ID")
+
+        if empty_fields:
+            messagebox.showerror(
+                "Error", f"Please fill in: {', '.join(empty_fields)}")
+            return
+
+        # Check if username already exists
+        if username in managers:
+            messagebox.showerror(
+                "Error", f"Username '{username}' already exists!")
+            return
+
+        # Check if manager ID already exists
+        for data in managers.values():
+            if data.get("id") == manager_id:
+                messagebox.showerror(
+                    "Error", f"Manager ID '{manager_id}' already exists!")
+                return
+
+        # Check if email already exists
+        for data in managers.values():
+            if data.get("email") == email:
+                messagebox.showerror(
+                    "Error", f"Email '{email}' is already registered!")
+                return
+
+        # Validate age is number
+        try:
+            age_int = int(age)
+            if age_int < 18 or age_int > 100:
+                messagebox.showerror(
+                    "Error", "Age must be between 18 and 100!")
+                return
+        except ValueError:
+            messagebox.showerror("Error", "Age must be a number!")
+            return
+
+        # Validate email format
+        if "@" not in email or "." not in email:
+            messagebox.showerror(
+                "Error", "Please enter a valid email address!")
+            return
+
+        # Validate phone (simple check)
+        if not phone.replace("-", "").replace(" ", "").isdigit():
+            messagebox.showerror(
+                "Error", "Phone number must contain only digits!")
+            return
+
+        # Create new manager
+        managers[username] = {
+            "username": username,
+            "password": password,
+            "name": name,
+            "age": age,
+            "address": address,
+            "phone": phone,
+            "email": email,
+            "position": position,
+            "id": manager_id
+        }
+
+        # Save to CSV
+        save_managers()
+
+        messagebox.showinfo("Success", f"Manager '{name}' added successfully!")
+        boss_view_managers()
+
+    # Buttons
+    button_frame = tk.Frame(content, bg=bg)
+    button_frame.pack(pady=30)
+
+    tk.Button(button_frame, text="💾 Save Manager", bg="green", fg="white",
+              command=save_manager, font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
+    tk.Button(button_frame, text="❌ Cancel", bg="gray", fg="white",
+              command=boss_view_managers, font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
+
+
+# ---------------- BOSS DELETE MANAGER ----------------
+def boss_delete_manager():
+    clear(content)
+
+    tk.Label(content, text="Delete Manager",
+             font=("Arial", 28, "bold"), bg=bg).pack(pady=20)
+
+    # Search frame
+    search_frame = tk.Frame(content, bg=bg)
+    search_frame.pack(pady=10)
+
+    tk.Label(search_frame, text="Search by:", font=(
+        "Arial", 14), bg=bg).pack(side=tk.LEFT, padx=5)
+
+    search_by = ttk.Combobox(search_frame, values=["Name", "ID", "Email", "Username"],
+                             font=("Arial", 14), width=10)
+    search_by.set("Name")
+    search_by.pack(side=tk.LEFT, padx=5)
+
+    # Search input and button frame
+    search_input_frame = tk.Frame(content, bg=bg)
+    search_input_frame.pack(pady=5)
+
+    search_entry = tk.Entry(search_input_frame, font=("Arial", 14), width=40)
+    search_entry.pack(side=tk.LEFT, padx=5)
+
+    tk.Button(search_input_frame, text="Search", bg=btn, fg="white",
+              command=lambda: search_managers(), font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
+
+    # Results frame
+    result_frame = tk.Frame(content, bg=bg)
+    result_frame.pack(pady=10, fill="both", expand=True)
+
+    def search_managers():
+        clear(result_frame)
+
+        search_term = search_entry.get().strip().lower()
+        search_type = search_by.get()
+
+        if not managers:
+            tk.Label(result_frame, text="No managers in the system",
+                     font=("Arial", 14), bg=bg, fg="gray").pack(pady=20)
+            return
+
+        found = []
+
+        for username, data in managers.items():
+            if search_type == "Name" and search_term in data.get("name", "").lower():
+                found.append((username, data))
+            elif search_type == "ID" and search_term in data.get("id", "").lower():
+                found.append((username, data))
+            elif search_type == "Email" and search_term in data.get("email", "").lower():
+                found.append((username, data))
+            elif search_type == "Username" and search_term in username.lower():
+                found.append((username, data))
+
+        if not found:
+            tk.Label(result_frame, text="No managers found matching your search",
+                     font=("Arial", 14), bg=bg, fg="red").pack(pady=20)
+            return
+
+        # Display each manager with delete button
+        for username, data in found:
+            manager_frame = tk.Frame(
+                result_frame, bg=bg, relief=tk.RAISED, bd=2)
+            manager_frame.pack(fill="x", pady=5, padx=20)
+
+            # Manager info
+            info_frame = tk.Frame(manager_frame, bg=bg)
+            info_frame.pack(side=tk.LEFT, fill="x",
+                            expand=True, padx=10, pady=5)
+
+            tk.Label(info_frame, text=f"Username: {username}",
+                     font=("Arial", 11, "bold"), bg=bg).pack(anchor="w")
+            tk.Label(info_frame, text=f"Name: {data.get('name', 'N/A')} | ID: {data.get('id', 'N/A')}",
+                     font=("Arial", 10), bg=bg).pack(anchor="w")
+            tk.Label(info_frame, text=f"Email: {data.get('email', 'N/A')} | Phone: {data.get('phone', 'N/A')}",
+                     font=("Arial", 10), bg=bg).pack(anchor="w")
+
+            # Delete button
+            tk.Button(manager_frame, text="Delete", bg="red", fg="white",
+                      command=lambda u=username: confirm_delete(u),
+                      font=("Arial", 10), width=8).pack(side=tk.RIGHT, padx=10)
+
+    def confirm_delete(username):
+        manager_data = managers[username]
+        name = manager_data.get('name', username)
+
+        if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete manager '{name}'?"):
+            del managers[username]
+            save_managers()
+            messagebox.showinfo(
+                "Deleted", f"Manager '{name}' has been deleted")
+            search_managers()  # Refresh results
+
+    # Back button
+    tk.Button(content, text="⬅️ Back", bg="gray", fg="white",
+              command=boss_view_managers, font=("Arial", 14), width=15).pack(pady=20)
+
+
+# ---------------- BOSS SEARCH EMPLOYEES (Enhanced) ----------------
+def boss_search_employees():
+    clear(content)
+
+    tk.Label(content, text="Search Employees",
+             font=("Arial", 28, "bold"), bg=bg).pack(pady=20)
+
+    # Search frame
+    search_frame = tk.Frame(content, bg=bg)
+    search_frame.pack(pady=10)
+
+    tk.Label(search_frame, text="Search by:", font=(
+        "Arial", 14), bg=bg).pack(side=tk.LEFT, padx=5)
+
+    search_by = ttk.Combobox(search_frame, values=["Name", "ID", "Email", "Designation"],
+                             font=("Arial", 14), width=12)
+    search_by.set("Name")
+    search_by.pack(side=tk.LEFT, padx=5)
+
+    # Search input and button frame
+    search_input_frame = tk.Frame(content, bg=bg)
+    search_input_frame.pack(pady=5)
+
+    search_entry = tk.Entry(search_input_frame, font=("Arial", 14), width=50)
+    search_entry.pack(side=tk.LEFT, padx=5)
+
+    tk.Button(search_input_frame, text="Search", bg=btn, fg="white",
+              command=lambda: search_employees(), font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
+
+    # Results frame
+    result_frame = tk.Frame(content, bg=bg)
+    result_frame.pack(pady=10, fill="both", expand=True)
+
+    def search_employees():
+        clear(result_frame)
+
+        search_term = search_entry.get().strip().lower()
+        search_type = search_by.get()
+
+        if not employees:
+            tk.Label(result_frame, text="No employees in the system",
+                     font=("Arial", 14), bg=bg, fg="gray").pack(pady=20)
+            return
+
+        found = []
+
+        for name, data in employees.items():
+            if search_type == "Name" and search_term in name.lower():
+                found.append((name, data))
+            elif search_type == "ID" and search_term in data.get("id", "").lower():
+                found.append((name, data))
+            elif search_type == "Email" and search_term in data.get("email", "").lower():
+                found.append((name, data))
+            elif search_type == "Designation" and search_term in data.get("designation", "").lower():
+                found.append((name, data))
+            elif not search_term:  # If search is empty, show all
+                found.append((name, data))
+
+        if not found and search_term:
+            tk.Label(result_frame, text="No employees found matching your search",
+                     font=("Arial", 14), bg=bg, fg="red").pack(pady=20)
+            return
+
+        # Create table for results
+        table_frame = tk.Frame(result_frame, bg=bg)
+        table_frame.pack(fill="both", expand=True)
+
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(table_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Treeview
+        table = ttk.Treeview(
+            table_frame, yscrollcommand=scrollbar.set, height=15)
+        scrollbar.config(command=table.yview)
+
+        table["columns"] = ("id", "designation", "age", "email", "salary")
+        table.heading("#0", text="Name")
+        table.heading("id", text="Employee ID")
+        table.heading("designation", text="Designation")
+        table.heading("age", text="Age")
+        table.heading("email", text="Email")
+        table.heading("salary", text="Salary")
+
+        table.column("#0", width=150)
+        table.column("id", width=100)
+        table.column("designation", width=150)
+        table.column("age", width=60)
+        table.column("email", width=200)
+        table.column("salary", width=100)
+
+        for name, data in found:
+            table.insert("", tk.END, text=name,
+                         values=(data.get("id", ""), data.get("designation", ""),
+                                 data.get("age", ""), data.get("email", ""),
+                                 f"${data.get('salary', '')}"))
+
+        table.pack(fill="both", expand=True)
+
+    # Initial load
+    search_employees()
+
+    # Back button
+    tk.Button(content, text="⬅️ Back", bg="gray", fg="white",
+              command=boss_profile, font=("Arial", 14), width=15).pack(pady=20)
+
 
 # ---------------- START ----------------
 
