@@ -18,6 +18,3 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# CSV files (optional - if you don't want to track data)
-*.csv
-!employees.csv  # Use ! to keep specific files if needed
