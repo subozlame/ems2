@@ -1,0 +1,4 @@
+employee,subject,enquiry,priority,date,status,response
+John Doe,IT Issue,My laptop is not working,High,2024-01-15 10:30:00,Pending,
+Jane Smith,Leave Request,Need leave next week,Normal,2024-01-15 11:45:00,Pending,
+Bob Wilson,Salary Query,When is the next increment?,Urgent,2024-01-16 09:15:00,Pending,

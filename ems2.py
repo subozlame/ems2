@@ -710,67 +710,110 @@ def reset_password():
               command=lambda: login("employee"), font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
 # ---------------- EMPLOYEE PAGE ----------------
 
+# ============== ENHANCED EMPLOYEE PORTAL FEATURES ==============
+
 
 def employee_dashboard(name):
+    global employee_name
+    employee_name = name
 
     clear(sidebar)
     clear(content)
 
     d = employees[name]
 
+    # Welcome message
     tk.Label(content, text=f"Welcome {name}",
              font=("Arial", 30, "bold"), bg=bg).pack(pady=30)
 
-    tk.Label(content, text=f"Email: {d['email']}", font=(
+    # Employee quick info
+    info_frame = tk.Frame(content, bg=bg)
+    info_frame.pack(pady=20)
+
+    tk.Label(info_frame, text=f"Email: {d['email']}", font=(
         "Arial", 16), bg=bg).pack()
-    tk.Label(content, text=f"Designation: {d['designation']}", font=(
+    tk.Label(info_frame, text=f"Designation: {d['designation']}", font=(
         "Arial", 16), bg=bg).pack()
 
-    tk.Button(content, text="Logout", bg="red", fg="white",
-              command=logout).pack(pady=30)
+    # Employee portal buttons in sidebar
+    clear(sidebar)
+    tk.Label(sidebar, text="EMPLOYEE PORTAL", font=("Arial", 16, "bold"),
+             bg=sidebar_color, fg="white").pack(pady=20)
 
-# ---------------- EMPLOYEE PROFILE ----------------
+    # Feature 2: View Profile
+    tk.Button(sidebar, text="👤 View My Profile", font=("Arial", 14),
+              bg=btn, fg="white", command=lambda: employee_profile(name),
+              width=20).pack(pady=5, padx=10)
+
+    # Feature 3: Edit Profile
+    tk.Button(sidebar, text="✏️ Edit My Profile", font=("Arial", 14),
+              bg=btn, fg="white", command=lambda: employee_edit_profile(name),
+              width=20).pack(pady=5, padx=10)
+
+    # Feature 1: Reset Password
+    tk.Button(sidebar, text="🔑 Reset Password", font=("Arial", 14),
+              bg=btn, fg="white", command=lambda: employee_reset_password(name),
+              width=20).pack(pady=5, padx=10)
+
+    # Feature 4: Give Suggestion
+    tk.Button(sidebar, text="💡 Give Suggestion", font=("Arial", 14),
+              bg=btn, fg="white", command=lambda: employee_suggestions(name),
+              width=20).pack(pady=5, padx=10)
+
+    # Feature 5: Make Enquiry
+    tk.Button(sidebar, text="❓ Make Enquiry", font=("Arial", 14),
+              bg=btn, fg="white", command=lambda: employee_enquiries(name),
+              width=20).pack(pady=5, padx=10)
+
+    # Logout button
+    tk.Button(sidebar, text="🚪 Logout", font=("Arial", 14),
+              bg="red", fg="white", command=logout,
+              width=20).pack(pady=20, padx=10)
 
 
+# ---------------- FEATURE 2: EMPLOYEE VIEW PROFILE ----------------
 def employee_profile(name):
-
     clear(content)
 
     d = employees[name]
 
-    tk.Label(content, text="My Profile",
+    # Header with employee name
+    tk.Label(content, text=f"My Profile - {name}",
              font=("Arial", 28, "bold"), bg=bg).pack(pady=30)
 
-    # Employee details
-    details_frame = tk.Frame(content, bg=bg)
-    details_frame.pack(pady=10)
+    # Create a frame for profile details
+    profile_frame = tk.Frame(content, bg=bg, relief=tk.GROOVE, bd=2)
+    profile_frame.pack(pady=20, padx=50, fill="both", expand=True)
 
-    tk.Label(details_frame, text=f"Name: {name}", font=(
-        "Arial", 16), bg=bg).pack(anchor="w")
-    tk.Label(details_frame, text=f"ID: {d['id']}", font=(
-        "Arial", 16), bg=bg).pack(anchor="w")
-    tk.Label(details_frame, text=f"Designation: {d['designation']}", font=(
-        "Arial", 16), bg=bg).pack(anchor="w")
-    tk.Label(details_frame, text=f"Age: {d['age']}", font=(
-        "Arial", 16), bg=bg).pack(anchor="w")
-    tk.Label(details_frame, text=f"Address: {d['address']}", font=(
-        "Arial", 16), bg=bg).pack(anchor="w")
-    tk.Label(details_frame, text=f"Salary: {d['salary']}", font=(
-        "Arial", 16), bg=bg).pack(anchor="w")
-    tk.Label(details_frame, text=f"Email: {d['email']}", font=(
-        "Arial", 16), bg=bg).pack(anchor="w")
-    tk.Label(details_frame, text=f"Password: {'*' * len(d['password'])}", font=(
-        "Arial", 16), bg=bg).pack(anchor="w")
+    # Employee details in organized layout
+    details = [
+        ("Employee ID:", d['id']),
+        ("Full Name:", name),
+        ("Designation:", d['designation']),
+        ("Age:", d['age']),
+        ("Address:", d['address']),
+        ("Salary:", f"${d['salary']}"),
+        ("Email:", d['email']),
+        ("Password:", '*' * len(d['password']))
+    ]
 
-    tk.Button(content, text="Edit Profile", bg="blue", fg="white",
-              command=lambda: employee_edit_profile(name)).pack(pady=10)
+    for i, (label, value) in enumerate(details):
+        row_frame = tk.Frame(profile_frame, bg=bg)
+        row_frame.pack(fill="x", pady=5, padx=20)
 
-    tk.Button(content, text="Back", bg="gray", fg="white",
-              command=lambda: employee_dashboard(name)).pack(pady=5)
+        tk.Label(row_frame, text=label, font=("Arial", 14, "bold"),
+                 bg=bg, width=15, anchor="w").pack(side=tk.LEFT)
+        tk.Label(row_frame, text=value, font=("Arial", 14),
+                 bg=bg, anchor="w").pack(side=tk.LEFT, padx=10)
+
+    # Back button
+    tk.Button(content, text="⬅️ Back to Dashboard", bg="blue", fg="white",
+              command=lambda: employee_dashboard(name),
+              font=("Arial", 14)).pack(pady=20)
 
 
+# ---------------- FEATURE 3: EMPLOYEE EDIT PROFILE ----------------
 def employee_edit_profile(name):
-
     clear(content)
 
     d = employees[name]
@@ -778,22 +821,31 @@ def employee_edit_profile(name):
     tk.Label(content, text="Edit My Profile",
              font=("Arial", 28, "bold"), bg=bg).pack(pady=30)
 
-    form = tk.Frame(content, bg=bg)
-    form.pack()
+    # Create form frame
+    form_frame = tk.Frame(content, bg=bg)
+    form_frame.pack(pady=20)
 
     # Editable fields (excluding name, id, password for security)
-    fields = ["designation", "age", "address", "salary", "email"]
+    fields = [
+        ("Designation:", "designation"),
+        ("Age:", "age"),
+        ("Address:", "address"),
+        ("Salary:", "salary"),
+        ("Email:", "email")
+    ]
+
     entries = {}
 
-    for i, f in enumerate(fields):
-        tk.Label(form, text=f.capitalize(), font=("Arial", 14),
-                 bg=bg).grid(row=i, column=0, padx=10, pady=10)
-        e = tk.Entry(form, font=("Arial", 14), width=30)
-        e.grid(row=i, column=1)
-        e.insert(0, d[f])
-        entries[f] = e
+    for i, (label, field) in enumerate(fields):
+        tk.Label(form_frame, text=label, font=("Arial", 14),
+                 bg=bg).grid(row=i, column=0, padx=10, pady=10, sticky="e")
 
-    # Password change section
+        e = tk.Entry(form_frame, font=("Arial", 14), width=30)
+        e.grid(row=i, column=1, pady=10, sticky="w")
+        e.insert(0, d[field])
+        entries[field] = e
+
+    # Password change section (optional)
     tk.Label(content, text="Change Password (Optional)",
              font=("Arial", 16, "bold"), bg=bg).pack(pady=20)
 
@@ -801,19 +853,21 @@ def employee_edit_profile(name):
     pass_frame.pack()
 
     tk.Label(pass_frame, text="New Password:", font=("Arial", 14),
-             bg=bg).grid(row=0, column=0, padx=10, pady=5)
-    new_pass = tk.Entry(pass_frame, font=("Arial", 14), width=30)
-    new_pass.grid(row=0, column=1)
+             bg=bg).grid(row=0, column=0, padx=10, pady=5, sticky="e")
+    new_pass = tk.Entry(pass_frame, font=("Arial", 14), width=30, show="*")
+    new_pass.grid(row=0, column=1, pady=5)
 
-    tk.Label(pass_frame, text="Confirm Password:", font=(
-        "Arial", 14), bg=bg).grid(row=1, column=0, padx=10, pady=5)
-    confirm_pass = tk.Entry(pass_frame, font=("Arial", 14), width=30)
-    confirm_pass.grid(row=1, column=1)
+    tk.Label(pass_frame, text="Confirm Password:", font=("Arial", 14),
+             bg=bg).grid(row=1, column=0, padx=10, pady=5, sticky="e")
+    confirm_pass = tk.Entry(pass_frame, font=("Arial", 14), width=30, show="*")
+    confirm_pass.grid(row=1, column=1, pady=5)
 
-    def save():
+    def save_changes():
         # Update regular fields
-        for f in fields:
-            employees[name][f] = entries[f].get()
+        for field in ["designation", "age", "address", "salary", "email"]:
+            new_value = entries[field].get().strip()
+            if new_value:
+                employees[name][field] = new_value
 
         # Update password if provided
         if new_pass.get():
@@ -827,143 +881,251 @@ def employee_edit_profile(name):
         messagebox.showinfo("Success", "Profile updated successfully!")
         employee_profile(name)
 
-    tk.Button(content, text="Save Changes", bg="green", fg="white",
-              command=save, font=("Arial", 14)).pack(pady=20)
+    # Buttons
+    button_frame = tk.Frame(content, bg=bg)
+    button_frame.pack(pady=30)
 
-    tk.Button(content, text="Cancel", bg="gray", fg="white",
-              command=lambda: employee_profile(name)).pack()
+    tk.Button(button_frame, text="💾 Save Changes", bg="green", fg="white",
+              command=save_changes, font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
 
-# ---------------- EMPLOYEE SUGGESTIONS ----------------
-
-
-def employee_suggestions(name):
-
-    clear(content)
-
-    tk.Label(content, text="Give Suggestion",
-             font=("Arial", 28, "bold"), bg=bg).pack(pady=30)
-
-    tk.Label(content, text="Your Suggestion:",
-             font=("Arial", 14), bg=bg).pack()
-    suggestion_text = tk.Text(content, font=("Arial", 14), height=10, width=50)
-    suggestion_text.pack(pady=10)
-
-    def submit():
-        suggestion = suggestion_text.get("1.0", tk.END).strip()
-        if not suggestion:
-            messagebox.showerror("Error", "Please enter a suggestion")
-            return
-
-        from datetime import datetime
-        suggestions.append({
-            "employee": name,
-            "suggestion": suggestion,
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
-        save_suggestions()
-
-        messagebox.showinfo("Success", "Suggestion submitted successfully!")
-        employee_dashboard(name)
-
-    tk.Button(content, text="Submit", bg="green", fg="white",
-              command=submit, font=("Arial", 14)).pack(pady=10)
-
-    tk.Button(content, text="Cancel", bg="gray", fg="white",
-              command=lambda: employee_dashboard(name)).pack()
-
-# ---------------- EMPLOYEE ENQUIRIES ----------------
+    tk.Button(button_frame, text="❌ Cancel", bg="gray", fg="white",
+              command=lambda: employee_profile(name), font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
 
 
-def employee_enquiries(name):
-
-    clear(content)
-
-    tk.Label(content, text="Make Enquiry",
-             font=("Arial", 28, "bold"), bg=bg).pack(pady=30)
-
-    tk.Label(content, text="Your Enquiry:", font=("Arial", 14), bg=bg).pack()
-    enquiry_text = tk.Text(content, font=("Arial", 14), height=10, width=50)
-    enquiry_text.pack(pady=10)
-
-    def submit():
-        enquiry = enquiry_text.get("1.0", tk.END).strip()
-        if not enquiry:
-            messagebox.showerror("Error", "Please enter an enquiry")
-            return
-
-        from datetime import datetime
-        enquiries.append({
-            "employee": name,
-            "enquiry": enquiry,
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
-        save_enquiries()
-
-        messagebox.showinfo("Success", "Enquiry submitted successfully!")
-        employee_dashboard(name)
-
-    tk.Button(content, text="Submit", bg="green", fg="white",
-              command=submit, font=("Arial", 14)).pack(pady=10)
-
-    tk.Button(content, text="Cancel", bg="gray", fg="white",
-              command=lambda: employee_dashboard(name)).pack()
-
-# ---------------- EMPLOYEE RESET PASSWORD ----------------
-
-
+# ---------------- FEATURE 1: EMPLOYEE RESET PASSWORD ----------------
 def employee_reset_password(name):
-
     clear(content)
 
     tk.Label(content, text="Reset My Password",
              font=("Arial", 28, "bold"), bg=bg).pack(pady=30)
 
-    tk.Label(content, text="Current Password:",
-             font=("Arial", 14), bg=bg).pack()
-    current = tk.Entry(content, font=("Arial", 14), show="*", width=30)
-    current.pack(pady=5)
+    # Create form frame
+    form_frame = tk.Frame(content, bg=bg)
+    form_frame.pack(pady=20)
 
-    tk.Label(content, text="New Password:", font=("Arial", 14), bg=bg).pack()
-    new = tk.Entry(content, font=("Arial", 14), show="*", width=30)
-    new.pack(pady=5)
+    tk.Label(form_frame, text="Current Password:", font=("Arial", 14),
+             bg=bg).grid(row=0, column=0, padx=10, pady=10, sticky="e")
+    current = tk.Entry(form_frame, font=("Arial", 14), show="*", width=30)
+    current.grid(row=0, column=1, pady=10)
 
-    tk.Label(content, text="Confirm New Password:",
-             font=("Arial", 14), bg=bg).pack()
-    confirm = tk.Entry(content, font=("Arial", 14), show="*", width=30)
-    confirm.pack(pady=5)
+    tk.Label(form_frame, text="New Password:", font=("Arial", 14),
+             bg=bg).grid(row=1, column=0, padx=10, pady=10, sticky="e")
+    new = tk.Entry(form_frame, font=("Arial", 14), show="*", width=30)
+    new.grid(row=1, column=1, pady=10)
+
+    tk.Label(form_frame, text="Confirm New Password:", font=("Arial", 14),
+             bg=bg).grid(row=2, column=0, padx=10, pady=10, sticky="e")
+    confirm = tk.Entry(form_frame, font=("Arial", 14), show="*", width=30)
+    confirm.grid(row=2, column=1, pady=10)
 
     def reset():
         current_pass = current.get()
         new_pass = new.get()
         confirm_pass = confirm.get()
 
-        if employees[name]["password"] != current_pass:
-            messagebox.showerror("Error", "Current password is incorrect!")
+        # Validations
+        if not current_pass or not new_pass or not confirm_pass:
+            messagebox.showerror("Error", "All fields are required!")
             return
 
-        if not new_pass:
-            messagebox.showerror("Error", "New password cannot be empty!")
+        if employees[name]["password"] != current_pass:
+            messagebox.showerror("Error", "Current password is incorrect!")
             return
 
         if new_pass != confirm_pass:
             messagebox.showerror("Error", "New passwords do not match!")
             return
 
+        if len(new_pass) < 4:
+            messagebox.showerror(
+                "Error", "Password must be at least 4 characters!")
+            return
+
+        # Update password
         employees[name]["password"] = new_pass
         save_employees()
 
         messagebox.showinfo("Success", "Password reset successfully!")
+
+        # Clear fields
+        current.delete(0, tk.END)
+        new.delete(0, tk.END)
+        confirm.delete(0, tk.END)
+
         employee_dashboard(name)
 
-    tk.Button(content, text="Reset Password", bg="blue", fg="white",
-              command=reset, font=("Arial", 14)).pack(pady=20)
+    # Buttons
+    button_frame = tk.Frame(content, bg=bg)
+    button_frame.pack(pady=20)
 
-    tk.Button(content, text="Cancel", bg="gray", fg="white",
-              command=lambda: employee_dashboard(name)).pack()
+    tk.Button(button_frame, text="🔄 Reset Password", bg="blue", fg="white",
+              command=reset, font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
 
+    tk.Button(button_frame, text="❌ Cancel", bg="gray", fg="white",
+              command=lambda: employee_dashboard(name), font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
+
+
+# ---------------- FEATURE 4: EMPLOYEE GIVE SUGGESTION ----------------
+def employee_suggestions(name):
+    clear(content)
+
+    tk.Label(content, text="💡 Give Suggestion",
+             font=("Arial", 28, "bold"), bg=bg).pack(pady=30)
+
+    # Suggestion form
+    form_frame = tk.Frame(content, bg=bg)
+    form_frame.pack(pady=20)
+
+    tk.Label(form_frame, text="Your Suggestion:", font=("Arial", 16),
+             bg=bg).pack(pady=10)
+
+    # Text area for suggestion
+    suggestion_text = tk.Text(form_frame, font=("Arial", 14),
+                              height=10, width=60, wrap=tk.WORD)
+    suggestion_text.pack(pady=10)
+
+    # Character count
+    char_count = tk.Label(form_frame, text="0 characters",
+                          font=("Arial", 10), bg=bg, fg="gray")
+    char_count.pack()
+
+    def update_count(event):
+        count = len(suggestion_text.get("1.0", tk.END).strip())
+        char_count.config(text=f"{count} characters")
+
+    suggestion_text.bind("<KeyRelease>", update_count)
+
+    def submit_suggestion():
+        suggestion = suggestion_text.get("1.0", tk.END).strip()
+
+        if not suggestion:
+            messagebox.showerror("Error", "Please enter a suggestion!")
+            return
+
+        if len(suggestion) < 10:
+            messagebox.showerror(
+                "Error", "Suggestion must be at least 10 characters!")
+            return
+
+        from datetime import datetime
+
+        # Add to suggestions list
+        suggestions.append({
+            "employee": name,
+            "suggestion": suggestion,
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "status": "Pending"
+        })
+
+        save_suggestions()
+
+        messagebox.showinfo(
+            "Success", "Thank you! Your suggestion has been submitted.")
+        employee_dashboard(name)
+
+    # Buttons
+    button_frame = tk.Frame(content, bg=bg)
+    button_frame.pack(pady=20)
+
+    tk.Button(button_frame, text="📤 Submit Suggestion", bg="green", fg="white",
+              command=submit_suggestion, font=("Arial", 14), width=20).pack(side=tk.LEFT, padx=10)
+
+    tk.Button(button_frame, text="❌ Cancel", bg="gray", fg="white",
+              command=lambda: employee_dashboard(name), font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
+
+
+# ---------------- FEATURE 5: EMPLOYEE MAKE ENQUIRY ----------------
+def employee_enquiries(name):
+    clear(content)
+
+    tk.Label(content, text="❓ Make an Enquiry",
+             font=("Arial", 28, "bold"), bg=bg).pack(pady=30)
+
+    # Enquiry form
+    form_frame = tk.Frame(content, bg=bg)
+    form_frame.pack(pady=20)
+
+    # Subject line
+    tk.Label(form_frame, text="Subject:", font=("Arial", 14),
+             bg=bg).pack(anchor="w", pady=(10, 5))
+    subject_entry = tk.Entry(form_frame, font=("Arial", 14), width=50)
+    subject_entry.pack(pady=5)
+
+    # Enquiry text
+    tk.Label(form_frame, text="Your Enquiry:", font=("Arial", 14),
+             bg=bg).pack(anchor="w", pady=(10, 5))
+    enquiry_text = tk.Text(form_frame, font=("Arial", 14),
+                           height=10, width=60, wrap=tk.WORD)
+    enquiry_text.pack(pady=5)
+
+    # Priority selection
+    tk.Label(form_frame, text="Priority:", font=("Arial", 14),
+             bg=bg).pack(anchor="w", pady=(10, 5))
+
+    priority_frame = tk.Frame(form_frame, bg=bg)
+    priority_frame.pack(anchor="w")
+
+    priority_var = tk.StringVar(value="Normal")
+
+    tk.Radiobutton(priority_frame, text="Low", variable=priority_var, value="Low",
+                   font=("Arial", 12), bg=bg).pack(side=tk.LEFT, padx=5)
+    tk.Radiobutton(priority_frame, text="Normal", variable=priority_var, value="Normal",
+                   font=("Arial", 12), bg=bg).pack(side=tk.LEFT, padx=5)
+    tk.Radiobutton(priority_frame, text="High", variable=priority_var, value="High",
+                   font=("Arial", 12), bg=bg).pack(side=tk.LEFT, padx=5)
+    tk.Radiobutton(priority_frame, text="Urgent", variable=priority_var, value="Urgent",
+                   font=("Arial", 12), bg=bg).pack(side=tk.LEFT, padx=5)
+
+    def submit_enquiry():
+        subject = subject_entry.get().strip()
+        enquiry = enquiry_text.get("1.0", tk.END).strip()
+        priority = priority_var.get()
+
+        if not subject:
+            messagebox.showerror("Error", "Please enter a subject!")
+            return
+
+        if not enquiry:
+            messagebox.showerror("Error", "Please enter your enquiry!")
+            return
+
+        if len(enquiry) < 10:
+            messagebox.showerror(
+                "Error", "Enquiry must be at least 10 characters!")
+            return
+
+        from datetime import datetime
+
+        # Add to enquiries list
+        enquiries.append({
+            "employee": name,
+            "subject": subject,
+            "enquiry": enquiry,
+            "priority": priority,
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "status": "Pending",
+            "response": ""
+        })
+
+        save_enquiries()
+
+        messagebox.showinfo(
+            "Success", "Your enquiry has been submitted. You will receive a response soon.")
+        employee_dashboard(name)
+
+    # Buttons
+    button_frame = tk.Frame(content, bg=bg)
+    button_frame.pack(pady=20)
+
+    tk.Button(button_frame, text="📤 Submit Enquiry", bg="green", fg="white",
+              command=submit_enquiry, font=("Arial", 14), width=20).pack(side=tk.LEFT, padx=10)
+
+    tk.Button(button_frame, text="❌ Cancel", bg="gray", fg="white",
+              command=lambda: employee_dashboard(name), font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
 
 # ---------------- MANAGER PROFILE ----------------
-# ---------------- MANAGER PROFILE ----------------
+
+
 def manager_profile():
     global current_manager, managers
     clear(content)
@@ -1417,14 +1579,14 @@ def dashboard(role):
                 ("Delete Employee", manager_delete_employee),
                 ("Add Employee", add_employee),
                 ("Edit Employee", edit_employee),
+                ("View Suggestions", manager_view_suggestions),
+                ("View Enquiries", manager_view_enquiries),
                 ("Profile", manager_profile)]
 
     else:  # employee
-        btns = [("My Profile", lambda: employee_profile(employee_name)),
-                ("Edit Profile", lambda: employee_edit_profile(employee_name)),
-                ("Reset Password", lambda: employee_reset_password(employee_name)),
-                ("Give Suggestion", lambda: employee_suggestions(employee_name)),
-                ("Make Enquiry", lambda: employee_enquiries(employee_name))]
+        if employee_name:
+            employee_dashboard(employee_name)
+        return
 
     for t, c in btns:
 
@@ -1637,8 +1799,339 @@ def boss_dashboard():
     tk.Button(content, text="Logout", bg="red", fg="white",
               command=logout).pack(pady=30)
 
+# ---------------- MANAGER VIEW SUGGESTIONS ----------------
+
+
+def manager_view_suggestions():
+    clear(content)
+
+    tk.Label(content, text="Employee Suggestions",
+             font=("Arial", 28, "bold"), bg=bg).pack(pady=20)
+
+    if not suggestions:
+        tk.Label(content, text="No suggestions have been submitted yet",
+                 font=("Arial", 16), bg=bg, fg="gray").pack(pady=50)
+        tk.Button(content, text="⬅️ Back to Dashboard", bg="blue", fg="white",
+                  command=lambda: dashboard("manager"), font=("Arial", 14)).pack(pady=20)
+        return
+
+    # Frame for table and scrollbar
+    table_frame = tk.Frame(content, bg=bg)
+    table_frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+    # Create treeview with scrollbar
+    scrollbar = ttk.Scrollbar(table_frame)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    table = ttk.Treeview(table_frame, yscrollcommand=scrollbar.set, height=15)
+    scrollbar.config(command=table.yview)
+
+    # Define columns
+    table["columns"] = ("employee", "date", "status", "actions")
+    table.column("#0", width=300, minwidth=200)
+    table.column("employee", width=150, minwidth=100)
+    table.column("date", width=150, minwidth=100)
+    table.column("status", width=100, minwidth=80)
+    table.column("actions", width=100, minwidth=80)
+
+    # Headings
+    table.heading("#0", text="Suggestion", anchor=tk.W)
+    table.heading("employee", text="Employee", anchor=tk.W)
+    table.heading("date", text="Date", anchor=tk.W)
+    table.heading("status", text="Status", anchor=tk.W)
+    table.heading("actions", text="Actions", anchor=tk.W)
+
+    # Insert data
+    for i, s in enumerate(suggestions):
+        item_id = table.insert("", tk.END,
+                               text=s["suggestion"],
+                               values=(s["employee"], s["date"],
+                                       s["status"], "Update"),
+                               tags=(i,))
+
+    table.pack(fill="both", expand=True)
+
+    # Bind double-click to open suggestion details
+    def on_double_click(event):
+        item = table.selection()[0]
+        item_index = table.item(item, "tags")[0]
+        show_suggestion_details(item_index)
+
+    table.bind("<Double-1>", on_double_click)
+
+    # Buttons frame
+    button_frame = tk.Frame(content, bg=bg)
+    button_frame.pack(pady=20)
+
+    tk.Button(button_frame, text="🔄 Refresh", bg="blue", fg="white",
+              command=manager_view_suggestions, font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
+    tk.Button(button_frame, text="⬅️ Back", bg="gray", fg="white",
+              command=lambda: dashboard("manager"), font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
+
+
+def show_suggestion_details(index):
+    """Show detailed view of a suggestion with status update option"""
+    s = suggestions[index]
+
+    # Create popup window
+    popup = tk.Toplevel()
+    popup.title("Suggestion Details")
+    popup.geometry("500x400")
+    popup.configure(bg=bg)
+
+    tk.Label(popup, text="Suggestion Details", font=("Arial", 18, "bold"),
+             bg=bg).pack(pady=10)
+
+    # Details frame
+    details_frame = tk.Frame(popup, bg=bg)
+    details_frame.pack(pady=10, padx=20, fill="both", expand=True)
+
+    # Employee
+    tk.Label(details_frame, text=f"Employee: {s['employee']}",
+             font=("Arial", 12, "bold"), bg=bg).pack(anchor="w", pady=2)
+
+    # Date
+    tk.Label(details_frame, text=f"Date: {s['date']}",
+             font=("Arial", 12), bg=bg).pack(anchor="w", pady=2)
+
+    # Status
+    status_frame = tk.Frame(details_frame, bg=bg)
+    status_frame.pack(anchor="w", pady=5)
+    tk.Label(status_frame, text="Status: ", font=("Arial", 12, "bold"),
+             bg=bg).pack(side=tk.LEFT)
+    status_label = tk.Label(status_frame, text=s['status'], font=("Arial", 12),
+                            bg=bg, fg="green" if s['status'] == "Implemented" else "orange")
+    status_label.pack(side=tk.LEFT)
+
+    # Suggestion text
+    tk.Label(details_frame, text="Suggestion:", font=("Arial", 12, "bold"),
+             bg=bg).pack(anchor="w", pady=(10, 2))
+
+    suggestion_text = tk.Text(details_frame, font=("Arial", 11),
+                              height=8, wrap=tk.WORD)
+    suggestion_text.pack(fill="both", expand=True, pady=5)
+    suggestion_text.insert("1.0", s['suggestion'])
+    suggestion_text.config(state=tk.DISABLED)
+
+    # Status update section
+    update_frame = tk.Frame(popup, bg=bg)
+    update_frame.pack(pady=10, padx=20, fill="x")
+
+    tk.Label(update_frame, text="Update Status:", font=("Arial", 12, "bold"),
+             bg=bg).pack(anchor="w")
+
+    status_var = tk.StringVar(value=s['status'])
+    status_combo = ttk.Combobox(update_frame, textvariable=status_var,
+                                values=["Pending", "Reviewed",
+                                        "Implemented", "Rejected"],
+                                font=("Arial", 11), width=20)
+    status_combo.pack(anchor="w", pady=5)
+
+    def update_status():
+        new_status = status_var.get()
+        suggestions[index]['status'] = new_status
+        save_suggestions()
+        messagebox.showinfo("Success", "Suggestion status updated!")
+        popup.destroy()
+        manager_view_suggestions()
+
+    tk.Button(update_frame, text="Update Status", bg="green", fg="white",
+              command=update_status, font=("Arial", 12)).pack(pady=10)
+
+    tk.Button(popup, text="Close", bg="gray", fg="white",
+              command=popup.destroy, font=("Arial", 12)).pack(pady=5)
+
+
+# ---------------- MANAGER VIEW ENQUIRIES ----------------
+def manager_view_enquiries():
+    clear(content)
+
+    tk.Label(content, text="Employee Enquiries",
+             font=("Arial", 28, "bold"), bg=bg).pack(pady=20)
+
+    if not enquiries:
+        tk.Label(content, text="No enquiries have been submitted yet",
+                 font=("Arial", 16), bg=bg, fg="gray").pack(pady=50)
+        tk.Button(content, text="⬅️ Back to Dashboard", bg="blue", fg="white",
+                  command=lambda: dashboard("manager"), font=("Arial", 14)).pack(pady=20)
+        return
+
+    # Frame for table and scrollbar
+    table_frame = tk.Frame(content, bg=bg)
+    table_frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+    # Create treeview with scrollbar
+    scrollbar = ttk.Scrollbar(table_frame)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+    table = ttk.Treeview(table_frame, yscrollcommand=scrollbar.set, height=12)
+    scrollbar.config(command=table.yview)
+
+    # Define columns
+    table["columns"] = ("employee", "subject", "priority", "date", "status")
+    table.column("#0", width=200, minwidth=150)
+    table.column("employee", width=120, minwidth=100)
+    table.column("subject", width=150, minwidth=120)
+    table.column("priority", width=80, minwidth=70)
+    table.column("date", width=130, minwidth=100)
+    table.column("status", width=100, minwidth=80)
+
+    # Headings
+    table.heading("#0", text="Enquiry", anchor=tk.W)
+    table.heading("employee", text="Employee", anchor=tk.W)
+    table.heading("subject", text="Subject", anchor=tk.W)
+    table.heading("priority", text="Priority", anchor=tk.W)
+    table.heading("date", text="Date", anchor=tk.W)
+    table.heading("status", text="Status", anchor=tk.W)
+
+    # Insert data with color coding for priority
+    for i, e in enumerate(enquiries):
+        # Truncate enquiry text for display
+        enquiry_preview = e["enquiry"][:50] + \
+            "..." if len(e["enquiry"]) > 50 else e["enquiry"]
+
+        item_id = table.insert("", tk.END,
+                               text=enquiry_preview,
+                               values=(e["employee"], e["subject"], e["priority"],
+                                       e["date"], e["status"]),
+                               tags=(i,))
+
+        # Color code by priority
+        if e["priority"] == "Urgent":
+            table.tag_configure(i, background="#ffcccc")  # Light red
+        elif e["priority"] == "High":
+            table.tag_configure(i, background="#fff0cc")  # Light orange
+        elif e["priority"] == "Low":
+            table.tag_configure(i, background="#ccffcc")  # Light green
+
+    table.pack(fill="both", expand=True)
+
+    # Bind double-click to open enquiry details
+    def on_double_click(event):
+        item = table.selection()[0]
+        item_index = table.item(item, "tags")[0]
+        show_enquiry_details(item_index)
+
+    table.bind("<Double-1>", on_double_click)
+
+    # Buttons frame
+    button_frame = tk.Frame(content, bg=bg)
+    button_frame.pack(pady=20)
+
+    tk.Button(button_frame, text="🔄 Refresh", bg="blue", fg="white",
+              command=manager_view_enquiries, font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
+    tk.Button(button_frame, text="⬅️ Back", bg="gray", fg="white",
+              command=lambda: dashboard("manager"), font=("Arial", 12), width=12).pack(side=tk.LEFT, padx=5)
+
+
+def show_enquiry_details(index):
+    """Show detailed view of an enquiry with response option"""
+    e = enquiries[index]
+
+    # Create popup window
+    popup = tk.Toplevel()
+    popup.title("Enquiry Details")
+    popup.geometry("600x600")
+    popup.configure(bg=bg)
+
+    tk.Label(popup, text="Enquiry Details", font=("Arial", 18, "bold"),
+             bg=bg).pack(pady=10)
+
+    # Details frame
+    details_frame = tk.Frame(popup, bg=bg)
+    details_frame.pack(pady=10, padx=20, fill="both", expand=True)
+
+    # Employee
+    tk.Label(details_frame, text=f"Employee: {e['employee']}",
+             font=("Arial", 12, "bold"), bg=bg).pack(anchor="w", pady=2)
+
+    # Subject
+    tk.Label(details_frame, text=f"Subject: {e['subject']}",
+             font=("Arial", 12, "bold"), bg=bg).pack(anchor="w", pady=2)
+
+    # Date
+    tk.Label(details_frame, text=f"Date: {e['date']}",
+             font=("Arial", 12), bg=bg).pack(anchor="w", pady=2)
+
+    # Priority with color
+    priority_frame = tk.Frame(details_frame, bg=bg)
+    priority_frame.pack(anchor="w", pady=2)
+    tk.Label(priority_frame, text="Priority: ", font=("Arial", 12, "bold"),
+             bg=bg).pack(side=tk.LEFT)
+
+    priority_colors = {"Urgent": "red", "High": "orange",
+                       "Normal": "blue", "Low": "green"}
+    priority_color = priority_colors.get(e['priority'], "black")
+    tk.Label(priority_frame, text=e['priority'], font=("Arial", 12, "bold"),
+             bg=bg, fg=priority_color).pack(side=tk.LEFT)
+
+    # Status
+    status_frame = tk.Frame(details_frame, bg=bg)
+    status_frame.pack(anchor="w", pady=2)
+    tk.Label(status_frame, text="Status: ", font=("Arial", 12, "bold"),
+             bg=bg).pack(side=tk.LEFT)
+    status_label = tk.Label(status_frame, text=e['status'], font=("Arial", 12),
+                            bg=bg, fg="green" if e['status'] == "Resolved" else "orange")
+    status_label.pack(side=tk.LEFT)
+
+    # Enquiry text
+    tk.Label(details_frame, text="Enquiry:", font=("Arial", 12, "bold"),
+             bg=bg).pack(anchor="w", pady=(10, 2))
+
+    enquiry_display = tk.Text(details_frame, font=("Arial", 11),
+                              height=6, wrap=tk.WORD)
+    enquiry_display.pack(fill="x", pady=5)
+    enquiry_display.insert("1.0", e['enquiry'])
+    enquiry_display.config(state=tk.DISABLED)
+
+    # Response section
+    tk.Label(details_frame, text="Response:", font=("Arial", 12, "bold"),
+             bg=bg).pack(anchor="w", pady=(10, 2))
+
+    response_text = tk.Text(details_frame, font=("Arial", 11),
+                            height=4, wrap=tk.WORD)
+    response_text.pack(fill="x", pady=5)
+    if e.get('response'):
+        response_text.insert("1.0", e['response'])
+
+    # Status update
+    update_frame = tk.Frame(details_frame, bg=bg)
+    update_frame.pack(fill="x", pady=10)
+
+    tk.Label(update_frame, text="Update Status:", font=("Arial", 11, "bold"),
+             bg=bg).pack(anchor="w")
+
+    status_var = tk.StringVar(value=e['status'])
+    status_combo = ttk.Combobox(update_frame, textvariable=status_var,
+                                values=["Pending", "In Progress",
+                                        "Resolved", "Closed"],
+                                font=("Arial", 11), width=15)
+    status_combo.pack(anchor="w", pady=5)
+
+    def update_enquiry():
+        new_status = status_var.get()
+        new_response = response_text.get("1.0", tk.END).strip()
+
+        enquiries[index]['status'] = new_status
+        if new_response:
+            enquiries[index]['response'] = new_response
+
+        save_enquiries()
+        messagebox.showinfo("Success", "Enquiry updated successfully!")
+        popup.destroy()
+        manager_view_enquiries()
+
+    # Buttons
+    button_frame = tk.Frame(popup, bg=bg)
+    button_frame.pack(pady=20)
+
+    tk.Button(button_frame, text="Save Response", bg="green", fg="white",
+              command=update_enquiry, font=("Arial", 12), width=15).pack(side=tk.LEFT, padx=5)
+    tk.Button(button_frame, text="Close", bg="gray", fg="white",
+              command=popup.destroy, font=("Arial", 12), width=10).pack(side=tk.LEFT, padx=5)
 
 # ---------------- START ----------------
+
 
 main_menu()
 
