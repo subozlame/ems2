@@ -186,13 +186,18 @@ def load_managers():
 
 
 def save_managers():
-    with open(MANAGER_FILE, "w", newline="") as f:
-        fields = ["username", "password", "name", "age", "address",
-                  "phone", "email", "position", "id"]
-        writer = csv.DictWriter(f, fieldnames=fields)
-        writer.writeheader()
-        for manager_data in managers.values():
-            writer.writerow(manager_data)
+    try:
+        with open(MANAGER_FILE, "w", newline="") as f:
+            fields = ["username", "password", "name", "age", "address",
+                      "phone", "email", "position", "id"]
+            writer = csv.DictWriter(f, fieldnames=fields)
+            writer.writeheader()
+            for manager_data in managers.values():
+                writer.writerow(manager_data)
+        return True
+    except Exception as e:
+        print(f"Save managers error: {e}")
+        return False
 
 
 load_employees()
@@ -1119,7 +1124,11 @@ def manager_edit_profile():
 
         # Validate age is number
         try:
-            int(new_age)
+            age_int = int(new_age)
+            if age_int < 18 or age_int > 100:
+                messagebox.showerror(
+                    "Error", "Age must be between 18 and 100!")
+                return
         except ValueError:
             messagebox.showerror("Error", "Age must be a number!")
             return
@@ -1154,20 +1163,35 @@ def manager_edit_profile():
             current_manager = new_username
 
         # SAVE TO CSV FILE
-        save_managers()
+        try:
+            # Call save_managers function
+            with open(MANAGER_FILE, "w", newline="") as f:
+                fields = ["username", "password", "name", "age", "address",
+                          "phone", "email", "position", "id"]
+                writer = csv.DictWriter(f, fieldnames=fields)
+                writer.writeheader()
+                for manager_data in managers.values():
+                    writer.writerow(manager_data)
 
-        messagebox.showinfo("Success", "Profile Updated Successfully!")
-        manager_profile()
+            messagebox.showinfo("Success", "Profile Updated Successfully!")
+            manager_profile()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save: {str(e)}")
+            print(f"Save error: {e}")  # Debug print
 
     # Buttons frame
     button_frame = tk.Frame(content, bg=bg)
     button_frame.pack(pady=20)
 
-    tk.Button(button_frame, text="Save Changes", bg="green", fg="white",
-              command=save, font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
+    # Save Changes button
+    save_button = tk.Button(button_frame, text="Save Changes", bg="green", fg="white",
+                            command=save, font=("Arial", 14), width=15)
+    save_button.pack(side=tk.LEFT, padx=10)
 
-    tk.Button(button_frame, text="Cancel", bg="gray", fg="white",
-              command=manager_profile, font=("Arial", 14), width=15).pack(side=tk.LEFT, padx=10)
+    # Cancel button
+    cancel_button = tk.Button(button_frame, text="Cancel", bg="gray", fg="white",
+                              command=manager_profile, font=("Arial", 14), width=15)
+    cancel_button.pack(side=tk.LEFT, padx=10)
 
 
 def manager_reset_password():
