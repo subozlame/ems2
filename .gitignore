@@ -1,0 +1,23 @@
+# Virtual Environment
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# CSV files (optional - if you don't want to track data)
+*.csv
+!employees.csv  # Use ! to keep specific files if needed
