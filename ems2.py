@@ -193,8 +193,20 @@ def save_managers():
                       "phone", "email", "position", "id"]
             writer = csv.DictWriter(f, fieldnames=fields)
             writer.writeheader()
-            for manager_data in managers.values():
-                writer.writerow(manager_data)
+            for mgr_data in managers.values():  # Changed variable name to avoid confusion
+                # Ensure all fields exist
+                row = {
+                    "username": mgr_data.get("username", ""),
+                    "password": mgr_data.get("password", ""),
+                    "name": mgr_data.get("name", ""),
+                    "age": mgr_data.get("age", ""),
+                    "address": mgr_data.get("address", ""),
+                    "phone": mgr_data.get("phone", ""),
+                    "email": mgr_data.get("email", ""),
+                    "position": mgr_data.get("position", ""),
+                    "id": mgr_data.get("id", "")
+                }
+                writer.writerow(row)
         return True
     except Exception as e:
         print(f"Save managers error: {e}")
@@ -1231,6 +1243,7 @@ def manager_edit_profile():
              font=("Arial", 12, "italic"), bg=bg, fg="gray").grid(row=10, column=0, columnspan=2, pady=5)
 
     def save():
+        global current_manager
         # Get all field values
         new_name = name_entry.get().strip()
         new_age = age_entry.get().strip()
@@ -1279,6 +1292,12 @@ def manager_edit_profile():
                 "Error", "Please enter a valid email address!")
             return
 
+        # Validate phone number (basic)
+        if not new_phone.replace("-", "").replace(" ", "").isdigit():
+            messagebox.showerror(
+                "Error", "Phone number must contain only digits!")
+            return
+
         # Check if username already exists (if changed)
         if new_username != current_manager and new_username in managers:
             messagebox.showerror(
@@ -1302,17 +1321,9 @@ def manager_edit_profile():
             managers[new_username]["username"] = new_username
             current_manager = new_username
 
-        # SAVE TO CSV FILE
+        # SAVE TO CSV FILE - Use the existing save_managers function
         try:
-            # Call save_managers function
-            with open(MANAGER_FILE, "w", newline="") as f:
-                fields = ["username", "password", "name", "age", "address",
-                          "phone", "email", "position", "id"]
-                writer = csv.DictWriter(f, fieldnames=fields)
-                writer.writeheader()
-                for manager_data in managers.values():
-                    writer.writerow(manager_data)
-
+            save_managers()  # Call the existing function instead of rewriting the save logic
             messagebox.showinfo("Success", "Profile Updated Successfully!")
             manager_profile()
         except Exception as e:
